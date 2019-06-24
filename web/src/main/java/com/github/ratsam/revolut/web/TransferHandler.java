@@ -44,7 +44,11 @@ public class TransferHandler {
         BigDecimal amount;
         try {
             amount = new BigDecimal(amountString);
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException | NullPointerException e) {
+            throw halt(400, "Missing or incorrect value for amount.");
+        }
+
+        if (amount.compareTo(new BigDecimal("0")) < 0) {
             throw halt(400, "Missing or incorrect value for amount.");
         }
 

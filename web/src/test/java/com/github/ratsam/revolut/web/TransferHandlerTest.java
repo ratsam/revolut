@@ -55,6 +55,15 @@ public class TransferHandlerTest {
     }
 
     @Test(expected = HaltException.class)
+    public void testNegativeAmountTransfer() throws Exception {
+        try {
+            handler.handle("1", "2", "-10");
+        } finally {
+            verifyZeroInteractions(accountServiceMock);
+        }
+    }
+
+    @Test(expected = HaltException.class)
     public void testUnknownAccountTransfer() throws Exception {
         doThrow(new AccountNotFoundException(1))
                 .when(accountServiceMock).transfer(anyInt(), anyInt(), any(BigDecimal.class));
