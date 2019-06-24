@@ -1,7 +1,7 @@
-package com.github.ratsam.revolute.web;
+package com.github.ratsam.revolut.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ratsam.revolute.AccountService;
+import com.github.ratsam.revolut.AccountService;
 
 import static spark.Spark.post;
 

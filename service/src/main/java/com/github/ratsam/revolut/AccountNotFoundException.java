@@ -1,4 +1,4 @@
-package com.github.ratsam.revolute;
+package com.github.ratsam.revolut;
 
 public class AccountNotFoundException extends Exception {
 

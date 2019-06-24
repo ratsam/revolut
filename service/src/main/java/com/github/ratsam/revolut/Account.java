@@ -1,4 +1,4 @@
-package com.github.ratsam.revolute;
+package com.github.ratsam.revolut;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

@@ -1,4 +1,4 @@
-package com.github.ratsam.revolute.web;
+package com.github.ratsam.revolut.web;
 
 
 import javax.annotation.Nullable;

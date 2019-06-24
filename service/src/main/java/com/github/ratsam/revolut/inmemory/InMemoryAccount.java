@@ -1,6 +1,6 @@
-package com.github.ratsam.revolute.inmemory;
+package com.github.ratsam.revolut.inmemory;
 
-import com.github.ratsam.revolute.Account;
+import com.github.ratsam.revolut.Account;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.math.BigDecimal;

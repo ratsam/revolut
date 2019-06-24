@@ -1,12 +1,12 @@
-package com.github.ratsam.revolute.inmemory;
+package com.github.ratsam.revolut.inmemory;
 
-import com.github.ratsam.revolute.Account;
-import com.github.ratsam.revolute.AccountIdConstraintViolationException;
-import com.github.ratsam.revolute.AccountNotFoundException;
-import com.github.ratsam.revolute.AccountService;
-import com.github.ratsam.revolute.InsufficientFundsException;
-import com.github.ratsam.revolute.TransferException;
-import com.github.ratsam.revolute.TransferResult;
+import com.github.ratsam.revolut.Account;
+import com.github.ratsam.revolut.AccountIdConstraintViolationException;
+import com.github.ratsam.revolut.AccountNotFoundException;
+import com.github.ratsam.revolut.AccountService;
+import com.github.ratsam.revolut.InsufficientFundsException;
+import com.github.ratsam.revolut.TransferException;
+import com.github.ratsam.revolut.TransferResult;
 
 import java.math.BigDecimal;
 import java.util.Map;

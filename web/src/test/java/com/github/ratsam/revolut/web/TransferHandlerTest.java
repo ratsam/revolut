@@ -1,10 +1,10 @@
-package com.github.ratsam.revolute.web;
+package com.github.ratsam.revolut.web;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ratsam.revolute.AccountNotFoundException;
-import com.github.ratsam.revolute.AccountService;
-import com.github.ratsam.revolute.InsufficientFundsException;
-import com.github.ratsam.revolute.TransferResult;
+import com.github.ratsam.revolut.AccountNotFoundException;
+import com.github.ratsam.revolut.AccountService;
+import com.github.ratsam.revolut.InsufficientFundsException;
+import com.github.ratsam.revolut.TransferResult;
 import org.junit.Before;
 import org.junit.Test;
 import spark.HaltException;
