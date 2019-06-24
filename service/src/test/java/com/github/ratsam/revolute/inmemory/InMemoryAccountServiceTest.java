@@ -2,6 +2,9 @@ package com.github.ratsam.revolute.inmemory;
 
 import com.github.ratsam.revolute.Account;
 import com.github.ratsam.revolute.AccountIdConstraintViolationException;
+import com.github.ratsam.revolute.AccountNotFoundException;
+import com.github.ratsam.revolute.InsufficientFundsException;
+import com.github.ratsam.revolute.TransferException;
 import org.hamcrest.CustomTypeSafeMatcher;
 import org.hamcrest.Matcher;
 import org.junit.Before;
@@ -24,7 +27,7 @@ public class InMemoryAccountServiceTest {
     }
 
     @Test
-    public void testAccountCreation() throws Exception {
+    public void testSuccessfulAccountCreation() throws Exception {
         assumeThat(accountService.findAccount(1), isEmpty());
 
         accountService.createAccount(1, new BigDecimal("100.99"));
@@ -38,6 +41,84 @@ public class InMemoryAccountServiceTest {
 
         accountService.createAccount(1, new BigDecimal("100.99"));
         accountService.createAccount(1, new BigDecimal("100.99"));
+    }
+
+    @Test
+    public void testSuccessfulTransfer() throws Exception {
+        accountService.createAccount(1, new BigDecimal("40"));
+        accountService.createAccount(2, new BigDecimal("70"));
+
+        accountService.transfer(1, 2, new BigDecimal("25"));
+
+        assertThat(accountService.getAccount(1), hasBalance("15"));
+        assertThat(accountService.getAccount(2), hasBalance("95"));
+    }
+
+    @Test(expected = InsufficientFundsException.class)
+    public void testInsufficientFundsTransferCausesException() throws Exception {
+        accountService.createAccount(1, new BigDecimal("40"));
+        accountService.createAccount(2, new BigDecimal("70"));
+
+        accountService.transfer(1, 2, new BigDecimal("45"));
+    }
+
+    @Test
+    public void testInsufficientFundsTransferLeavesBalancesUnmodified() throws Exception {
+        accountService.createAccount(1, new BigDecimal("40"));
+        accountService.createAccount(2, new BigDecimal("70"));
+
+        try {
+            accountService.transfer(1, 2, new BigDecimal("45"));
+        } catch (TransferException e) {
+            // No-op. See "testInsufficientFundsTransferCausesException" for exception testing.
+        }
+
+        assertThat("Balance shouldn't change if transfer can't be completed",
+                accountService.getAccount(1), hasBalance("40"));
+        assertThat("Balance shouldn't change if transfer can't be completed",
+                accountService.getAccount(2), hasBalance("70"));
+    }
+
+    @Test(expected = AccountNotFoundException.class)
+    public void testTransferFromUnknownAccountCausesException() throws Exception {
+        accountService.createAccount(2, new BigDecimal("70"));
+
+        accountService.transfer(1, 2, new BigDecimal("25"));
+    }
+
+    @Test
+    public void testTransferFromUnknownAccountLeavesBalanceUnmodified() throws Exception {
+        accountService.createAccount(2, new BigDecimal("70"));
+
+        try {
+            accountService.transfer(1, 2, new BigDecimal("25"));
+        } catch (AccountNotFoundException e) {
+            // No-op. See "testTransferFromUnknownAccountCausesException" for exception case.
+        }
+
+        assertThat("Balance shouldn't change if transfer can't be completed",
+                accountService.getAccount(2), hasBalance("70"));
+    }
+
+    @Test(expected = AccountNotFoundException.class)
+    public void testTransferToUnknownAccountCausesException() throws Exception {
+        accountService.createAccount(1, new BigDecimal("40"));
+
+        accountService.transfer(1, 2, new BigDecimal("25"));
+    }
+
+    @Test
+    public void testTransferToUnknownAccountLeavesBalanceUnmodified() throws Exception {
+        accountService.createAccount(1, new BigDecimal("40"));
+
+        try {
+            accountService.transfer(1, 2, new BigDecimal("25"));
+        } catch (AccountNotFoundException e) {
+            // No-op. See "testTransferToUnknownAccountCausesException" for exception case.
+        }
+
+        assertThat("Balance shouldn't change if transfer can't be completed",
+                accountService.getAccount(1), hasBalance("40"));
     }
 
     private Matcher<Account> hasBalance(String expectedBalance) {

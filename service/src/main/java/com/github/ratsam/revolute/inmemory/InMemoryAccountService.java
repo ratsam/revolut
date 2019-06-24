@@ -4,6 +4,7 @@ import com.github.ratsam.revolute.Account;
 import com.github.ratsam.revolute.AccountIdConstraintViolationException;
 import com.github.ratsam.revolute.AccountNotFoundException;
 import com.github.ratsam.revolute.AccountService;
+import com.github.ratsam.revolute.InsufficientFundsException;
 import com.github.ratsam.revolute.TransferException;
 import com.github.ratsam.revolute.TransferResult;
 
@@ -13,7 +14,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * AccountService implementation that stored accounts data in memory
+ * AccountService implementation that stores accounts data in memory
  * and uses double-synchronization for money transfer.
  */
 public class InMemoryAccountService implements AccountService {
@@ -46,7 +47,41 @@ public class InMemoryAccountService implements AccountService {
 
     @Override
     public TransferResult transfer(Integer senderId, Integer recipientId, BigDecimal amount) throws TransferException, AccountNotFoundException {
-        throw new UnsupportedOperationException();
+        InternalAccountData sender = storage.get(senderId);
+        InternalAccountData recipient = storage.get(recipientId);
+
+        if (sender == null) {
+            throw new AccountNotFoundException(senderId);
+        }
+        if (recipient == null) {
+            throw new AccountNotFoundException(recipientId);
+        }
+
+        return transfer(sender, recipient, amount);
+    }
+
+    private TransferResult transfer(InternalAccountData sender, InternalAccountData recipient, BigDecimal amount) throws InsufficientFundsException {
+        return withLockedAccounts(sender, recipient, () -> {
+            if (sender.balance.compareTo(amount) < 0) {
+                throw new InsufficientFundsException();
+            }
+            sender.balance = sender.balance.subtract(amount);
+            recipient.balance = recipient.balance.add(amount);
+            return new TransferResult(sender.id, sender.balance, sender.id, sender.balance);
+        });
+    }
+
+    private <T, E extends Exception> T withLockedAccounts(InternalAccountData accountA, InternalAccountData accountB, AccountsAction<T, E> action) throws E {
+        // Avoid dead-locks by forcing lock order.
+        if (accountA.id > accountB.id) {
+            return withLockedAccounts(accountB, accountA, action);
+        } else {
+            synchronized (accountA) {
+                synchronized (accountB) {
+                    return action.perform();
+                }
+            }
+        }
     }
 
     /**
@@ -62,5 +97,10 @@ public class InMemoryAccountService implements AccountService {
             this.id = id;
             this.balance = balance;
         }
+    }
+
+    interface AccountsAction<T, E extends Exception> {
+
+        T perform() throws E;
     }
 }
